@@ -8,7 +8,9 @@ tags:
 categories: blog
 ---
 
-借助于github的github pages，通过hexo创建个人博客。
+借助于github的github pages，通过hexo创建个人博客，本文描述了如何搭建，以及常见的问题及经验。
+
+<!-- more -->
 
 ### 本人环境配置
     hexo: 3.2.0
