@@ -77,6 +77,8 @@ tag_generator:
 plugins: hexo-generator-cname hexo-generator-sitemap
 baidusitemap:
     path: baidusitemap.xml
+sitemap:
+path: sitemap.xml
 duoshuo_shortname: zhangxiangnan
 duoshuo_hotartical: true
 jiathis: true
