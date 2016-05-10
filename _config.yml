@@ -97,3 +97,4 @@ deploy:
   type: git
   repository: https://github.com/zhangxiangnan/zhangxiangnan.github.io.git
   branch: master
+ 
