@@ -91,3 +91,20 @@ $ npm install hexo-deployer-git --save
 
   ### 主题及其设定、常见第三方服务见:
   http://theme-next.iissnan.com/getting-started.html
+
+### 常用命令
+
+ #### 清理项目
+
+
+  清理项目
+  hexo clean
+
+#### 构建生成项目
+hexo generate 或者hexo g
+
+#### 本地预览项目
+hexo server
+
+#### 新建文章
+hexo new title "xx"
