@@ -5,9 +5,9 @@
 # Site
 title: 张向南的博客
 subtitle: progress everyday
-description:
+description: 每一篇博客，讲一个点
 author: zhangxiangnan
-email: qbdg12@gmail.com
+email: 1194256997@qq.com
 language: zh-Hans
 timezone:
 
@@ -97,4 +97,3 @@ deploy:
   type: git
   repository: https://github.com/zhangxiangnan/zhangxiangnan.github.io.git
   branch: master
- 
