@@ -11,7 +11,7 @@ categories: thrift
 <!-- more -->
 
 #### 简介
-apache的thrift框架，用于可扩展的跨语言的服务开发，把软件栈和代码生成引擎结合，来构建高效的、在C++、JAVA、Python、PHP、Ruby、Erlang、Perl、Haskell、C#、Cocoa、JavaScript、Node.js、SmallTalk、Ocami、Dephi及他语言之间无缝的服务。
+apache的thrift框架，facebook开发，用于可扩展的跨语言的服务开发，把软件栈和代码生成引擎结合，来构建高效的、在C++、JAVA、Python、PHP、Ruby、Erlang、Perl、Haskell、C#、Cocoa、JavaScript、Node.js、SmallTalk、Ocami、Dephi及他语言之间无缝的服务。
 
 #### thrfit的数据类型
 thrift的类型系统目的在于允许开发人员尽可能使用本地类型，不用管他们使用的是何种编程语言。thrift的IDL提供类型的描述，用来生成每一个目标语言对应的代码。

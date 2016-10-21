@@ -1,0 +1,32 @@
+layout: title
+title: thrift简单例子
+date: 2016-10-10 20:01:47
+tags:
+- thrift
+- thrift demo
+
+categories: thrift
+---
+本文介绍如何写一个thrift的简单例子，包括服务端、客户端。
+<!-- more -->
+
+#### thrfit编译器安装（mac）
+简单安装方式：brew install thrift
+官方方式（比较繁琐）：http://thrift.apache.org/docs/install/os_x
+
+#### 引入thrift的jar包
+maven引入方式：
+
+        <dependency>
+          <groupId>org.apache.thrift</groupId>
+          <artifactId>libthrift</artifactId>
+          <version>0.9.3</version>
+        </dependency>
+普通jar包下载：http://thrift.apache.org/download
+
+#### 编写.thrift文件
+
+
+#### 生成源码
+thrift --gen <language> <Thrift filename>
+如生成java语言的源码，则是thrift --gen java <Thrift filename>
