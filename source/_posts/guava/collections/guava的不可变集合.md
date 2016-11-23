@@ -108,10 +108,9 @@ ImmutableXXX.copyOf(ImmutableCollection)通常会在符合以下条件下来尝�
 
 #### asList
 
-所有的不可变集合通过asList()提供一个不可变ImmutableList视图，所以 -- 如 -- 即使你有使用ImmutableSortedSet排序的数据，你也可以使用sortedSet.asList().get(k).来得到第k个最小的元素。
+所有的不可变集合通过asList()返回一个不可变的ImmutableList视图，所以 -- 如 -- 即使你有使用ImmutableSortedSet排序的数据，你也可以使用sortedSet.asList().get(k).来得到第k个最小的元素。
 
-经常返回ImmutableList -- 不总是，但是经常 -- 一个常数级开销的视图，而不是执行显示拷贝。即，它更常常更聪明比average List -- 如，它使用支持集合的更高效的contains方法。
-Details
+返回ImmutableList是普遍的 -- 不总是，但是经常 -- 一个常数级开销的视图，而不是执行显示拷贝。即，它比平常的List通常更智能 -- 如，它底层使用更高效的contains方法。
 
 ### jdk可变集合与guava不可变集合对应关系？
 
