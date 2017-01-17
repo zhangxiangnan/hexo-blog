@@ -42,7 +42,7 @@ Guava的Multiset API结合了这2种方式，如下：
     - count(Object)方法返回指定元素的出现次数。HashMultiset的count方法效率是O(1)，TreeMultiset的count方法效率是O(log n)等。
     - entrySet() 类似Map的entrySet。
     - elementSet()返回multiset的一个去重的元素集合`Set<E>`，类似于Map的keySet()
-    - 针对不重复的元素来说，Multiset实现类的空间复杂度是线性的。
+    - 针对不重复的元素来说，Multiset实现类内存消耗（空间复杂度）随着不重复元素的数目线性增长,即重复存储相同对象。
 
 尤其需要注意，Multiset是和JDK集合Collection的接口规范完全一致的，除了JDK自身的早期版本的极少见情形 -- 特别的，TreeMultiset，类似TreeSet，使用comparison来比较是否相等，而不是Object的equals方法. 特别地，Multiset.addAll(Collection)在集合中的每个元素每出现一次，该元素的出现次数加一，该方式比上面的使用Map+for循环更简便。
 
@@ -149,11 +149,11 @@ Multimap提供很多实现，可以在大多数想使用`Map<K, Colleciton<V>>`�
 
 实现 |	Key行为类似	| Values行为类似
 - | - |
-ArrayListMultimap	| HashMap |	ArrayList
-HashMultimap	| HashMap|	HashSet
-LinkedListMultimap *	|LinkedHashMap*	|LinkedList*
-LinkedHashMultimap**	|LinkedHashMap	|LinkedHashSet
-TreeMultimap	|TreeMap	|TreeSet
+ArrayListMultimap	| HashMap |	ArrayList，同key对应values有顺序可重复
+HashMultimap	| HashMap|	HashSet,同key对应values不可重复
+LinkedListMultimap	|LinkedHashMap	|LinkedList 同key对应value有顺序可重复
+LinkedHashMultimap	|LinkedHashMap	|LinkedHashSet 同key对应value有顺序不重复
+TreeMultimap	|TreeMap	|TreeSet，同key对应的value有顺序
 ImmutableListMultimap	|ImmutableMap	|ImmutableList
 ImmutableSetMultimap	|ImmutableMap	|ImmutableSet
 
@@ -161,14 +161,14 @@ ImmutableSetMultimap	|ImmutableMap	|ImmutableSet
 
   - LinkedListMultimap.entries()，对于不重复的key value保持了迭代时的顺序。
 
-  - LinkedHashMultimap，保持了entries的插入顺序、keys的插入顺序、任意一个key关联的values的set的顺序。
+  - LinkedHashMultimap，保持了映射项entries的插入顺序，包括键keys的插入顺序、和任意一个key关联的values所有值的插入顺序。
 
 要知道以上的所有实现中并不是所有的实现都通过`Map<K, Collection<V>>`（特别的，几个MultiMap实现使用了自定义hash表来最小化开销）
 
 如果你想要更多自定义，使用MultiMaps.newMultimap(Map, Supplier<Collection)或者list、set自定义实现来支撑自定义multimap。
 
 
-### BiMap双向Map
+### BiMap 双向Map
 
 传统映射values到key的方式是维护2个独立的map，保持他们同步，但是这种方式当一个value已经在map里存在时令人极度困惑且感觉像是bug。如：   
 
@@ -183,6 +183,7 @@ A `BiMap<K, V>` 是一个`Map<K,V>`：
   - 允许你使用inverse()方法来得到反转视图BiMap<V,K>
   - 确保values是不重复的，使values类似一个Set
 
+所有，BiMap的特点是key、value都不能重复。
 若尝试添加一个key到已经存在的value映射会报参数异常。若想删除预先存在的entry（指定的value），则使用BiMap.forcePut(key, value)。
 
     public static void main(String[] args) {
@@ -270,6 +271,10 @@ A RangeSet描述了一个不连续的、非空的范围集合，当往一个可�
         rangeSet.add(Range.closed(1, 10).canonical(DiscreteDomain.integers())); // {[1, 10]}
         rangeSet.add(Range.closedOpen(11, 15)); // disconnected range: {[1, 10], [11, 15)}
         System.out.println(rangeSet);//[[1‥15)]
+
+        // canonical可以理解为规范化，效果如下：
+        System.out.println(Range.closed(1, 10).canonical(DiscreteDomain.integers()));[1‥11)
+        System.out.println(Range.closed(1, 10));[1‥10]
 
 注意: RangeSet 在GWT下和JDK1.5之下都不被支持；RangeSet需要全部NavigableMap的特征在JDK1.6中。
 

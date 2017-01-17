@@ -1,0 +1,14 @@
+//    @RequestMapping(value = "/delAvInTair", method = RequestMethod.GET)
+//    public ModelAndView avQuery(@RequestParam(value = "from", required = true) String from,
+//                                @RequestParam(value = "to", required = true) String to,
+//                                @RequestParam(value = "startDate", required = true) String startDateStr,
+//                                @RequestParam(value = "endDate", required = true) String endDateStr) {
+//        DateTime startDate = DateTime.parse(startDateStr);
+//        DateTime endDate = DateTime.parse(endDateStr);
+//        List<String> keyList = Lists.newArrayList();
+//
+//        int count = 0;
+//        for (; endDate.isAfter(startDate) || endDate.isEqual(startDate); startDate = startDate.plusDays(1)) {
+//            avTairCacheSao.delAvFlightRes(KeyUtils.getMergeAvCacheKey(from, to, DateUtils.dateToStringWithFormatY_M_D(startDate)));
+//        }
+//    }
