@@ -4,12 +4,53 @@ date: 2017-01-09 17:17:02
 tags:
 - kafka
 categories:
-- 译
 - kafka
 ---
 
 kafka的入门知识
 <!-- more -->
+### kafka的背景
+Kafka是LinkedIn开发的一个分布式消息系统，使用Scala编写，现成为Apache项目。它以可水平扩展和高吞吐率而被广泛使用。目前越来越多的开源分布式处理系统如Cloudera、Apache Storm、Spark都支持与Kafka集成。现在很多不同类型公司用来作为多种类型的数据管道和消息系统使用。
+
+### 应用场景
+
+- 日志收集：收集各种服务的log，通过kafka以统一接口方式开放给consumer，例如：Hadoop、Hbase等
+- 消息系统：解耦producer和consumer，缓存消息
+- 用户活动跟踪：记录用户各种活动，如page view、搜索、点击等，这些消息被发送到topic中，然后consumer做实时的监控分析
+- 运营指标：记录运营监控指标，服务器的性能数据，如：CPU,IO,响应时间等
+- 事件源
+- 实时流处理
+- 提交日志，用于备份还原
+
+### kafka的拓扑结构
+
+#### 拓扑图
+
+![tuopu](http://cdn.infoqstatic.com/statics_s1_20161108-0613/resource/articles/kafka-analysis-part-1/zh/resources/0310020.png)
+
+#### 几个概念
+##### Broker
+Kafka集群包含一个或多个服务器，这种服务器被称为broker（代理服务器）。一台kafka服务器就是一个broker，一个集群由多个broker组成，一个broker可以容纳多个topic。
+
+##### Topic
+每条发布到Kafka集群的消息都有一个类别或者叫做主题，这个类别被称为Topic，Kafka中Topic可以理解为一个存储消息的队列。物理上不同Topic的消息分开存储，逻辑上一个Topic的消息虽然保存在一个或多个broker上，但用户只需指定消息的Topic即可生产或消费数据而不必关心数据存于何处。
+
+##### Partition
+分区，Partition是物理上的概念，Kafka物理上把Topic分成一个或多个Partition，每个Partition在物理上对应一个文件夹，该文件夹下存储这个Partition的所有消息和索引文件。如创建topic1和topic2两个topic，且分别有13个和19个Partition分区，则整个集群上相应会生成32个文件夹。为了实现扩展性，一个非常大的topic可以分布到多个broker上，但kafka只保证按一个partition中的顺序将消息发给consumer，不保证一个topic的整体（多个partition间）的顺序。
+
+##### Producer
+消息生产者，负责发布消息到Kafka broker
+
+##### Consumer
+消息消费者，向Kafka broker读取消息的客户端。
+
+##### Consumer Group（CG）
+kafka用来实现一个topic消息的广播（发给所有的consumer）和单播（发给任意一个consumer）的手段。一个topic可以属于多个CG，即多个CG可以无差别地消费一个topic的信息。topic的消息会复制（不是真的复制，是概念上的）到所有的CG，但每个CG只会把消息发给该CG中的一个consumer。如果需要实现广播，只要每个consumer有一个独立的CG就可以了。要实现单播只要所有的consumer在同一个CG。用CG还可以将consumer进行自由的分组而不需要多次发送消息到不同的topic（不懂）。每个consumer属于一个特定的Consumer Group, Kafka允许为每个consumer指定group name，若不指定group name则属于默认的group。
+
+##### Offset偏移量
+kafka的存储文件都是按照offset.kafka来命名，用offset做名字的好处是方便查找。例如你想找位于2049的位置，只要找到2048.kafka的文件即可。当然the first offset就是00000000000.kafka   
+
+一个Kafka集群中会包含若干个Producer（可能是端上的PV数据，或者服务器日志，CPU、Memory监控信息等），若干个Broker（Broker越多，集群的吞吐量越高），若干个Consumer Group，以及一个zookeeper集群。Kafka通过zookeeper管理broker和consumer的动态加入和离开。Producer通过push方式将消息发送到Broker，Consumer通过pull方式从Broker订阅消费消息。
 
 ### kafka是一个分布式的流式传输平台
 分布式流平台应该具有的三个特征：
@@ -22,7 +63,7 @@ kafka用于2大类应用程序：
   - 构建可靠地在系统或应用程序之间获取数据的实时流数据流水线
   - 构建对数据流进行变换或反应的实时流应用程序
 
-几个概念：
+相关概念：
 Kafka作为集群运行在一个或者多个机器上
 Kafka集群以称为主题的类别存储记录流。
 每个记录由一个键，一个值和一个时间戳组成。
@@ -38,13 +79,19 @@ Kafka有四个核心API：
 
 Kafka中，客户端和服务端的通讯使用一个简单的，高性能的，语言无关的TCP协议。该协议有版本控制，并保持与旧版本的向后兼容性。同时，提供了很多种语言的Kafka客户端。
 
-### 主题Topics和日志Logs
+### Kafka文件存储机制
+#### Topic & Partition
+
 Kafka为记录流提供的核心抽象便是主题（topic）.
 主题是发布记录的类别或者feed名称。Kafka的主题总是支持多个消费者的，即一个主题可以拥有0个、1个或者多个订阅者来订阅发送到该主题的数据。
 
 对于每个主题，Kafka集群维护了一个分区日志如下图：
 ![log_anatomy](
 http://kafka.apache.org/0101/images/log_anatomy.png)
+
+逻辑上Topic可以看为一个Queue，每个消息必须指定它所属的Topic，可理解为每条消息必须指明放到哪个Queue里。
+物理上把Topic分成一个或多个Partition，每个Partition对应一个文件夹，文件夹存储Partition所有消息和索引文件。每个Partition有自己的副本，每个副本分布在不同的Broker节点上。通过多个Partition可使得吞吐率能线性提升。
+消息append到Partition中，属于顺序写磁盘，顺序写磁盘效率远大于随机写内存，因此效率高。
 
 每一个分区是一个有序的、不可变的记录序列，不断地追加到结构化提交日志。分区中的每条记录都被赋予了一个顺序的id号，称作offset偏移量，偏移量在某个分区内唯一标示每条记录。
 
@@ -58,6 +105,16 @@ http://kafka.apache.org/0101/images/log_consumer.png)
 这些功能的组合使kafka的消费者非常轻量级，消费者来来去去，对集群和其他消费者却没什么太多影响。如，你可以通过kafka命令行工具的tail命令来获取任何主题的记录，却无需更改任何现有用户使用的内容。
 
 日志的分区设计有几个目的。首先分区使日志可以增加到超出单台服务器的容量。首先，它们允许日志扩展到适合单个服务器的大小。每个单独的分区必须适合托管它的服务器，但主题可能有许多分区，因此它可以处理任意数量的数据。第二，为了并行性
+
+#### partition存储结构
+Partition命名规则：Topic+有序序号(从0开始)，例如topic_name-0, topic_name-1, topic_name-2 ...   
+
+Partition和副本分配方法。例如一个Kafka集群有2个Broker，创建一个Topic包含2个Partition，1个副本，则broker-0存放partition-0、partition-1，broker-1存放partition-0，partition-1即可 。
+
+Partition中文件存储方式：每个Partition平均分配到多个大小相等的Segment数据文件中，Segment文件生命周期由server端配置参数决定。   
+Kafka有2种策略删除旧数据：
+- 基于时间，例如：删除1周以前的数据
+- 基于partition文件大小，例如：Partition文件大于1GB时候删除旧数据
 
 ### 分布式
 日志的分区分布在kafka集群中的服务器上，每个服务器处理数据并请求共享分区。每个分区都使用可配置数量的服务器进行复制，以实现容错。
