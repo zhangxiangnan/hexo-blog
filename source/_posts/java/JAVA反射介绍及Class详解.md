@@ -9,7 +9,8 @@ categories: java
 
 ### 反射的用途
   反射对于想要在运行时去检查或修改运行在Java虚拟机中的程序的运行时行为的场合，经常用到。
-
+  <!-- more -->
+  
   - 可扩展的特征
   应用程序可以通过使用可扩展对象的全名称创建实例来使用外部用户定义的类
   - 类浏览器和可视化开发环境
@@ -595,3 +596,35 @@ getConstructors()	|yes	|N/A1	|no
     Method m = c.getMethod("m");  
 
 建议：通常的原则是,警告不应该被忽略， 因为警告可能表明一个bug。参数化声明应该合理使用。如果参数化声明不可能（如和厂商的类库代码交互），则可以使用@SuppressWarnings.
+
+##### 构造函数不可访问时构造异常
+如果在类的无参构造函数不可访问时，调用Class.newInstance()方法会抛出InstantiationException异常。
+
+      class Cls {
+          private Cls() {}
+      }
+
+      public class ClassTrouble {
+          public static void main(String... args) {
+      	try {
+      	    Class<?> c = Class.forName("Cls");
+      	    c.newInstance();  // InstantiationException
+      	} catch (InstantiationException x) {
+      	    x.printStackTrace();
+      	} catch (IllegalAccessException x) {
+      	    x.printStackTrace();
+      	} catch (ClassNotFoundException x) {
+      	    x.printStackTrace();
+      	}
+          }
+      }
+
+      $ java ClassTrouble
+      java.lang.IllegalAccessException: Class ClassTrouble can not access a member of
+        class Cls with modifiers "private"
+              at sun.reflect.Reflection.ensureMemberAccess(Reflection.java:65)
+              at java.lang.Class.newInstance0(Class.java:349)
+              at java.lang.Class.newInstance(Class.java:308)
+              at ClassTrouble.main(ClassTrouble.java:9)
+Class.newInstance()的行为和new关键字很类似，会因为new关键失败的相同原因失败。反射里通用的解决方案是利用java.lang.reflect.AccessibleObject类提供的抑制访问控制校验的功能；然而由于java.lang.Class没继承AccessibleObject，所以不会有效。唯一的方案是使使用Constructor.newInstance()方法的类继承AccessibleObject。
+建议：通常，更倾向于使用Constructor.newInstance()
