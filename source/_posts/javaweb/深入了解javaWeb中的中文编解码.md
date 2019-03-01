@@ -48,24 +48,28 @@ UTF-8 |处理unicode编码 | 变长 | 每个编码区域不同字码长度，不
 #### 内存中编解码
 ##### String提供的方法
 如下：
-
+```
     String s = "hah哈你好";
     byte[] b = s.getBytes("UTF-8");
     String n =new String(b, "UTF-8");
+```
 
 ##### Charset的encode和decode方法
  其提供char[]到byte[]编码及byte[]到char[]解码，如下：   
 
-
+```
     Charset charset = Charset.forName("UTF-8");
     ByteBuffer byteBuffer = charset.encode(string);
     CharBuffer charBuffer = charset.decode(byteBuffer);
+```
 
 ##### ByteBuffer类的软转换
 ByteBuffer提供char与byte的软转换，转换不需要编解码，只是把16bit的char拆分为2个8bit的byte表示，实际值没有修改，仅仅数据类型做转换：   
 
+```
       ByteBuffer bytebuffer2 = ByteBuffer.allocate(1024);   
       ByteBuffer byteBuffer = bytebuffer2.putChar(c);
+```
 
 ### javaWeb中涉及的编解码
 网络传输都是以字节为单位，java对象要经过网络传输必须经过序列化，实现Serializable序列化接口。
@@ -99,13 +103,16 @@ POST表单提交的参数的解码在第一次调用request.getParameter时发�
 
 #### 数据库连接的编解码
 若使用jdbc，存取数据时要和数据的内置编码保持一致，可在jdbc的url中设置编码指定。
-
+```
       url="jdbc:mysql://localhost:3306/db?useUnicode=true&characterEncoding=GBK"
+```
 #### js编解码
 ##### js文件编解码
+```    
     <html>
     <head>
     <script src="xxx/a.js" charset="gbk"/>
+```
 引入的js文件若有中文，和本html页面的编码若不一致则会乱码，可以手动指定编码格式。
 
 ##### js的url编解码

@@ -27,6 +27,7 @@ OkHttp当网络出问题时做如下尝试：
 OKHttp支持android>=2.3，java版本最低1.7
 
 ### Get请求示例
+```   
     package cn.xiangnan.okhttpdemo;
 
     import okhttp3.OkHttpClient;
@@ -56,8 +57,9 @@ OKHttp支持android>=2.3，java版本最低1.7
         System.out.println(response);
     }
     }
-
+```
 ### POST请求示例（提交json数据）
+```    
     package cn.xiangnan.okhttpdemo;
 
     import okhttp3.*;
@@ -102,3 +104,4 @@ OKHttp支持android>=2.3，java版本最低1.7
             System.out.println(response);
         }
     }
+```

@@ -12,7 +12,7 @@ categories:
 
 ### 现象
   收到线上机器单个CPU平均load过高的报警，登陆到机器，命令行执行top命令显示如下：   
-
+```
     [zhangxia@xxxx ~]$ top
 
     top - 17:38:39 up 58 days,  6:38,  2 users,  load average: 0.66, 0.20, 0.19
@@ -24,14 +24,14 @@ categories:
 
     PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                
     8288 zhangxia  20   0 2628m  29m  11m S 98.1  1.6   0:25.24 java          
-
+```
   可以发现进程号为8288的进程CPU使用率为98%，接近100%。
 ### 解决过程
   #### top找到cpu占用最高的进程号
   已找到进程号为8288.
   #### 查看已找到的进程中哪个线程CPU使用率最高
   在top执行的视图里执行shift+H快捷键，提示“Show threads On”，此时展示的PID为线程ID，可以观察到线程id为19234的线程占用CPU最高。或者使用”Top -Hp 进程号“来观察。
-
+```
     top - 17:47:40 up 58 days,  6:47,  2 users,  load average: 0.71, 0.23, 0.18
     Tasks: 526 total,   2 running, 524 sleeping,   0 stopped,   0 zombie
     Cpu0  : 25.5%us, 44.4%sy,  0.0%ni,  0.0%id,  0.0%wa,  0.0%hi,  1.9%si, 28.2%st
@@ -41,14 +41,15 @@ categories:
 
     PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                
     19234 zhangxia  20   0 2628m  29m  11m R 97.3  1.6   0:26.50 java
-
+```
   ##### jstack+进程号导出线程堆栈
   执行导出某个进程内的所有线程堆栈信息到文件：
-
+```
     jstack 8288 > stack.8288
+```
   堆栈信息导出到了当前文件夹，为stack.8288。
   内容如下：
-
+```
       2017-02-24 18:12:51
     Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.45-b02 mixed mode):
 
@@ -106,15 +107,17 @@ categories:
       "VM Periodic Task Thread" os_prio=0 tid=0x00007f8b040cc800 nid=0x4b30 waiting on condition
 
       JNI global references: 9
-
+```
   #### 得到线程号8566的十六进制表示
   命令行执行如下命令：
+```
     printf '%x\n' 19234
+```
   得到十六进制表示为4b22
 
   #### 在堆栈日志中查找线程号十六进制表示为4b22的线程堆栈信息
     在堆栈文件中查找4b22，得到如下线程堆栈信息：
-
+```
       "main" #1 prio=5 os_prio=0 tid=0x00007f8b04009800 nid=0x4b22 runnable [0x00007f8b0a8ae000]
      java.lang.Thread.State: RUNNABLE
   	at java.io.FileOutputStream.writeBytes(Native Method)
@@ -135,5 +138,5 @@ categories:
   	at java.io.PrintStream.println(PrintStream.java:806)
   	- locked <0x00000006c6c06f30> (a java.io.PrintStream)
   	at CpuLoadHighTest.main(CpuLoadHighTest.java:4)
-
+```
 根绝CpuLoadHighTest.main(CpuLoadHighTest.java:4)可得到问题出现的具体位置，然后分析是否死循环死锁等问题即可解决。   

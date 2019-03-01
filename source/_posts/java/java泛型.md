@@ -19,19 +19,20 @@ Java中的泛型详解！
 #### 泛型类型
 泛型是类型参数化的泛型类或接口。
 不用泛型时(可放各种类型，所以运行时强转时容易异常)：
-
+```
     public class Box {
       private Object object;
       public void set(Object object) { this.object = object; }
       public Object get() { return object; }
     }
+```
 
 泛型类的定义：
-
+```
     class name<T1, T2, ..., Tn> { }
-
+```
 例子：
-
+```
     public class Box<T> {
         // T stands for "Type"
         private T t;
@@ -39,7 +40,7 @@ Java中的泛型详解！
         public void set(T t) { this.t = t; }
         public T get() { return t; }
     }  
-
+```
 类型变量T可以在类中任何地方使用，类型变量可以是任何非基本类型的类型：任意类类型、接口类型、以至另一个类型变量。
 
 ##### 类型参数命名规范
@@ -54,17 +55,18 @@ Java中的泛型详解！
 ##### 泛型调用及实例化
 泛型类型的调用(也称参数化类型)：Box<Integer> integerBox;
 实例化：
-
+```
     Box<Integer> integerBox = new Box<Integer>();
     Box<Integer> integerBox = new Box<>();//>=jdk7
+```
 ##### 参数化类型
 类型参数也可以是参数化类型：
-
+```
     OrderedPair<String, Box<Integer>> p = new OrderedPair<>("primes", new Box<Integer>(...));
-
+```
 #### 泛型方法
 泛型方法指引入类型参数的方法，在方法的返回类型之前声明，使用<>，可以有多个类型参数，适用于静态、非静态、构造方法。
-
+```
     public class Util {
         public static <K, V> boolean compare(Pair<K, V> p1, Pair<K, V> p2) {
             return p1.getKey().equals(p2.getKey()) &&
@@ -91,18 +93,18 @@ Java中的泛型详解！
     Pair<Integer, String> p2 = new Pair<>(2, "pear");
     boolean same = Util.<Integer, String>compare(p1, p2);
     boolean same = Util.compare(p1, p2);//类型推导
-
+```
 #### 有界（受限）类型参数
   有些情况想限制类型参数的参数类型为某个类型或及其子类型，用extends表示.
   extends此处表示类的继承和接口的实现。
-
+```
     public <U extends Number> void inspect(U u){
           System.out.println("T: " + t.getClass().getName());
           System.out.println("U: " + u.getClass().getName());
     }
-
+```
 有界类型参数可以调用界限类型里定义的方法，如：
-
+```
     public class NaturalNumber<T extends Integer> {
       private T n;
       public NaturalNumber(T n)  { this.n = n; }
@@ -111,11 +113,11 @@ Java中的泛型详解！
       }
       // ...
     }
-
+```
 界限可以有多个，用&连接，多个界限中最多只能有一个类；如果有一个类，多个接口，则该类必须在最左，如<T extends B1 & B2 & B3> （B1为类）
 
 有界类型参数是泛型算法实现的关键，如：
-
+```
     public interface Comparable<T> {
       public int compareTo(T o);
     }
@@ -126,9 +128,9 @@ Java中的泛型详解！
                 ++count;
         return count;
     }
-
+```
 #### 泛型&继承&子类型
-
+```
       Box<Number> box = new Box<Number>();
       box.add(new Integer(10));   // OK
       box.add(new Double(10.1));  // OK
@@ -136,18 +138,19 @@ Java中的泛型详解！
       public void boxTest(Box<Number> n) { }
       boxTest(new Box(10))
       //error,Box<Integer>、Box<Double>都不是Box<Number>的子类型。
+```
 A继承于B，但是不代表Class<A>继承于Class<B>
 
 泛型的继承可以通过extends或implements来实现：
-
+```
     ArrayList<String> -> List<String> -> Collection<String>
-
+```
 #### 类型推导
 Java编译器从方法调用传入的类型以及对应的方法声明的参数类型来推断出使方法调用最合理的参数类型。
-
+```
     static <T> T pick(T a1, T a2) { return a2; }
     Serializable s = pick("d", new ArrayList<String>())
-
+```
 有了类型推导，在泛型方法调用、实例化泛型类、泛型类/非泛型类的泛型构造方法调用都可以省略。
 类型推导只通过调用参数、目标类型、返回值类型来推导，而不是用程序后续的结果类型。
 
@@ -156,15 +159,16 @@ Java编译器从方法调用传入的类型以及对应的方法声明的参数�
 
 ##### 上限通配符
 上限通配符用来放宽变量的限制，比如想定义一个方法，适用于 List<Integer>, List<Double>, and List<Number>类型。
-
+```
     public static void process(List<? extends Number>) {}
+```
 List<Number>限制所有类型只能为Number，但List<? extends Number>可匹配Number及Number子类型，并且每个元素都可以调用Number类里的方法。
 
 ##### 无界通配符
 使用?定义，如List<?>，称作未知类型的list，适用场合：
   - 如果在写一个可以使用Object类中的功能实现的方法
   - 当代码在泛型中使用不依赖类型参数的方法，如List.size List.clear，实际上Class<?>最常用，因为Class<T>里的多数方法不依俩T。
-
+```
     // 不适用于List<Integer>、List<String>等
     public static void printList(List<Object> list) {
       for (Object elem : list)
@@ -178,6 +182,7 @@ List<Number>限制所有类型只能为Number，但List<? extends Number>可匹�
           System.out.print(elem + " ");
       System.out.println();
     }
+```
 
 List<?>与List<Object>不一样，List<Object>可以往里面添加Object、及Object的任务子类型，但是List<?>声明的变量只能往里添加null。
 
@@ -188,10 +193,10 @@ List<Integer>和List<? super Integer>不一样，List<Integer>匹配Integer的�
 
 ##### 通配符和子类型
 A extends B，但是Class<A>和Class<B>没有继承关系，如何让两者有关系？
-
+```
     List<? extends Integer> intList = new ArrayList<>();
     List<? extends Number>  numList = intList;  // OK. List<? extends Integer>是List<? extends Number>的子类型
-
+```
 List<?>是List<Integer>和List<Number>的父类型。
 
 List<Integer> -> List<? extends Integer> -> List<? extends Number> -> List<?>
@@ -204,16 +209,16 @@ List<Integer> -> List<? super Integer>
 
 ##### 通配符捕获和辅助方法
 有些情况下，编译器可以捕获到通配符的类型，这种叫通配符捕捉。
-
+```
   public class WildcardError {
 
     void foo(List<?> i) {
         i.set(0, i.get(0));//报包含capture of ?的错误
       }
     }
-
+```
 添加辅助方法来解决：
-
+```
     public class WildcardFixed {
       void foo(List<?> i) {
           fooHelper(i);
@@ -223,7 +228,7 @@ List<Integer> -> List<? super Integer>
           l.set(0, l.get(0));
       }
     }
-
+```
 ##### 通配符的使用场合
 何时使用上界通配符、何时使用下界通配符？首先通配符主要用在方法的形式参数声明上，应避免使用在方法返回类型上（调用者需要处理通配符）
 - 输入变量(In)就是一个提供数据给代码使用的变量，如拷贝方法copy(src, dst)，src就是输入变量，因为src提供了用来拷贝的数据（producer）；
@@ -260,6 +265,7 @@ java针对参数化类型不会生成新的类，所以泛型不会产生运行�
 
 ##### 桥接方法
 如下：
+```
     public class Node<T> {
     public T data;
     public Node(T data) { this.data = data; }
@@ -275,9 +281,9 @@ java针对参数化类型不会生成新的类，所以泛型不会产生运行�
           super.setData(data);
       }
     }
-
+```
 类型擦除后：
-
+```
     public class Node {
       public Object data;
       public Node(Object data) { this.data = data; }
@@ -294,9 +300,9 @@ java针对参数化类型不会生成新的类，所以泛型不会产生运行�
           super.setData(data);
       }
     }
-
+```
 擦除后setData方法不能覆盖父类的setData方法，为了保持泛型类型在擦除后的多态特性，java编译器自动生成桥接方法如下：
-
+```
     class MyNode extends Node {
       //桥接方法
         public void setData(Object data) {
@@ -307,14 +313,15 @@ java针对参数化类型不会生成新的类，所以泛型不会产生运行�
             super.setData(data);
         }
     }
-
+```
 #### 泛型的限制
 ##### 不能使用基本类型实例化泛型类型
-
+```
     Pair<int, char> p = new Pair<>(8, 'a');//error
     Pair<Integer, Character> p = new Pair<>(8, 'a');// 8，'a'会自动装箱
+```
 ##### 不能创建类型参数的实例
-
+```
     public static <E> void append(List<E> list) {
       E elem = new E();  // compile-time error
       list.add(elem);
@@ -324,16 +331,17 @@ java针对参数化类型不会生成新的类，所以泛型不会产生运行�
       E elem = cls.newInstance();   // 反射可以实现
       list.add(elem);
     }
-
+```
 ##### 不能声明类型为类型参数的静态字段
-
+```
     public class MobileDevice<T> {
       private static T os;//编译错误
     }
+```
 因为静态字段是所有类的实例共享，多个实例实例化时传入不同的T类型，则无法确定os字段属于哪一个类型。
 
 ##### 针对参数化类型不能使用cast或instanceof
-
+```
     public static <E> void rtti(List<E> list) {
       if (list instanceof ArrayList<Integer>) { //编译错误
       }
@@ -349,12 +357,13 @@ java针对参数化类型不会生成新的类，所以泛型不会产生运行�
 
     List<String> l1 = ...;
     ArrayList<String> l2 = (ArrayList<String>)l1;  // OK
+```
 ##### 不能创建参数化的数组类型
-
+```
     List<Integer>[] arrayOfLists = new List<Integer>[2];  //编译错误，数组声明时需要具体化的类型
-
+```
 ##### 不能创建、捕获、抛出序列化类型的对象
-
+```
     // 不能隐式地继承Throwable
     class MathException<T> extends Exception {  }    // compile-time error
 
@@ -376,13 +385,14 @@ java针对参数化类型不会生成新的类，所以泛型不会产生运行�
       public void parse(File file) throws T {     // OK
       }
     }
-
+```
 ##### 形式类型参数擦除后类型一样的不能重载
+```
     public class Example {
       public void print(Set<String> strSet) { }
       public void print(Set<Integer> intSet) { }
     }
-
+```
 #### 非具体化类型
  具体化类型是指运行时完全可以获取到其类型信息的类型，如基本类型、非泛型类型、裸（原始）类型、或者无界通配符的调用。
  非具体化类型是指编译时类型信息被擦除,如泛型类型的调用（无界通配符除外），非具化类型运行时没有足够的类型信息。如JVM运行时无法区分List<String>、List<Integer>。非具化类型不能用于：instaceof表达式、或者作为数组的元素。

@@ -34,6 +34,7 @@ https://leetcode.com/problems/reverse-linked-list/
   6、总的来说，需要newHead、oldHead、nextNode3个变量，在原链表还是一段的时候，我们的oldHead指向a，nextNode=a.next，newHead则等于null,三个变量的表示意思为：oldHead表示待反转链表的头结点，newHead表示已反转链表的头结点（所以一开始初始值为null），nextNode表示带反转链表的头结点的下一个结点（所以初始值为oldHead.next)。
 
 #### 迭代（循环）实现
+  ```
     `/**
      * Definition for singly-linked list.
      * public class ListNode {
@@ -59,7 +60,12 @@ https://leetcode.com/problems/reverse-linked-list/
            return newHeadNode;
         }
     }
-    为什么while循环要以nextNode！= null作为结束条件？考虑以下实现，只是不同的初始化方式：
+  ```
+
+
+  为什么while循环要以nextNode！= null作为结束条件？考虑以下实现，只是不同的初始化方式：
+  ```
+  
     `/**
      * Definition for singly-linked list.
      * public class ListNode {
@@ -83,18 +89,21 @@ https://leetcode.com/problems/reverse-linked-list/
             return newHead;// newHead结点即为新链表的头结点
         }
     }
-
+```
 #### 递归方式思路
 前面分析的过程可以概括为一个已反转链表（初始为null）部分，一个未反转链表部分（初始为待反转链表），每次都是从待反转链表拿出头结点，作为已反转链表部分的头结点，不断重复这个过程，直到待反转链表部分只剩下null结点。这个过程和递归很类似，递归就是在函数里调用函数本身，重复调用函数本身说明解决的问题结构很类似，刚才的分析过程中一直存在的结构或变量有2个，一个是已反转链表、一个未反转链表，那递归函数是不是可以这么定义？
 
+  ```
       private ListNode reverse(ListNode oldHead, ListNode newHead)
-  我在这个函数里要调用函数自身进行递归，所以：    
-
+  ```
+我在这个函数里要调用函数自身进行递归，所以：    
+```
         private ListNode reverse(ListNode oldHead, ListNode newHead){
           return reverse(oldHead, newHead);
         }
+```
   貌似需要在递归里做些处理，回想我们在每一次的从待反转链表结点里拿出头结点oldHead（拿出前需要先记住oldHead的next结点，否则修改oldHead的next指向后，便找不到原next结点了），将其next指向已反转链表的头结点，这样未反转链表和已反转链表的头结点都发生了变化，我们需要更新oldHead和newHead的指向。
-
+```
         private ListNode reverse(ListNode oldHead, ListNode newHead){
           ListNode next = oldHead.next;// 记住待反转链表头结点的next结点
           oldHead.next = newHead;// 将oldHead结点从待反转链表结点拿出，使其成为已反转链表结点的头结点
@@ -102,8 +111,10 @@ https://leetcode.com/problems/reverse-linked-list/
           oldHead = next;// 更新oldHead结点指向，指向此时待反转链表结点的头结点（为先前保存的next指向的结点）
           return reverse(oldHead, newHead);
         }
-   貌似递归还缺少递归出口，拿什么作为出口？回想刚才分析过程，最终是以待反转链表的头结点未null，结束，此时已反转链表的头结点就是反转后新链表的头结点。
-
+  ```
+  貌似递归还缺少递归出口，拿什么作为出口？回想刚才分析过程，最终是以待反转链表的头结点未null，结束，此时已反转链表的头结点就是反转后新链表的头结点。
+  
+  ```
      private ListNode reverse(ListNode oldHead, ListNode newHead){
        if(oldHead == null) return newHead;
        ListNode next = oldHead.next;// 记住待反转链表头结点的next结点
@@ -112,9 +123,11 @@ https://leetcode.com/problems/reverse-linked-list/
        oldHead = next;// 更新oldHead结点指向，指向此时待反转链表结点的头结点（为先前保存的next指向的结点）
        return reverse(oldHead, newHead);
      }
+  ```
 #### 递归方式实现
 
-    public ListNode reverseList(ListNode head) {
+  ```
+      public ListNode reverseList(ListNode head) {
         if(head == null) return null;
         return reverse(head, null);// 一开始已反转链表为null，因此头结点未null
     }
@@ -128,3 +141,4 @@ https://leetcode.com/problems/reverse-linked-list/
       oldHead = next;// 更新oldHead结点指向，指向此时待反转链表结点的头结点（为先前保存的next指向的结点）
       return reverse(oldHead, newHead);
     }
+  ```

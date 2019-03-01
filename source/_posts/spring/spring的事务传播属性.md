@@ -18,7 +18,7 @@ spring管理的事务中，事务是否允许嵌套？如何配置无事务？�
 
 ### 事务传播行为种类
 spring的TransactionDefinition接口定义了7中类型的事务传播行为，他们规定了事务方法与事务方法在发生嵌套调用时如何传播事务。
-
+```
     int PROPAGATION_REQUIRED = 0;
     int PROPAGATION_SUPPORTS = 1;
     int PROPAGATION_MANDATORY = 2;
@@ -26,7 +26,7 @@ spring的TransactionDefinition接口定义了7中类型的事务传播行为，�
     int PROPAGATION_NOT_SUPPORTED = 4;
     int PROPAGATION_NEVER = 5;
     int PROPAGATION_NESTED = 6;
-
+```
 传播行为     | 说明
 -------- | ---
 PROPAGATION_REQUIRED | 只支持单个事务，有事务就使用这个事务，无则创建一个新事务，事务定义的默认配置，事务同步范围的常用配置。
@@ -38,12 +38,14 @@ PROPAGATION_NEVER | 只能以非事务运行，有事务就报错。
  PROPAGATION_NESTED | 如果当前环境不存在事务则与PROPAGATION_REQUIRED一样，否则若有事务，则新建子事务，子事务与父事务形成嵌套事务，事务有联系，不是独立的。该行为需基于jdbc3.0，且持久化框架需实现了保存点事务机制。
 
  ### PROPAGATION_REQUIRES_NEW（新事务）与PROPAGATION_NESTED（嵌套事务）的区别？
+```
 - PROPAGATION_REQUIRES_NEW(新事务)当前没有事务则创建新事务，当前有事务会将外层事务挂起，新事务执行完毕外层事务继续执行；PROPAGATION_NESTED（嵌套事务）不会挂起外层事务。
 - PROPAGATION_REQUIRES_NEW创建的新事务和外层事务无关，相互独立地提交和回滚，拥有自己的数据库隔离级别和锁；PROPAGATION_NESTED的嵌套事务和外层事务有关联，外层事务提交或回滚，子事务也会提交回滚。
-
+```
 ### 嵌套事务的提交回滚说明
 　　外层事务相当于父事务，内层事务相当于子事务。    
 　　嵌套事务是子事务套在父事务中执行，进入子事务之前，父事务建立一个回滚点或者叫保存点savepoint，然后执行子事务，子事务执行完毕，父事务继续执行。
+
 - 子事务回滚，父事务发生什么？　父事务会滚到savepoint，继续执行其他事务与业务逻辑，父事务之前操作不影响，不会自动回滚。
 - 父事务回滚，子事务呢？  子事务回滚，子事务是父事务的一部分，随着父事务提交而提交。
 - 子事务、父事务提交事务的顺序？外层事务提交时，子事务一并提交，子事务不能先提交。

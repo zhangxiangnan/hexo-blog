@@ -16,7 +16,7 @@ Guava介绍了许多jdk中没有的但是很有用处的新集合类型，这些
 
 ### Multiset
 传统的JAVA惯例手法来统计一文档中的单词出现频率，类似如下：
-
+```
     Map<String, Integer> counts = new HashMap<String, Integer>();
     for (String word : words) {
       Integer count = counts.get(word);
@@ -26,6 +26,7 @@ Guava介绍了许多jdk中没有的但是很有用处的新集合类型，这些
         counts.put(word, count + 1);
       }
     }
+```
 这种方式笨拙，容易出错，且不支持收集各种有用的统计信息，如单词总数，而Guava做的更好。
 Guava提供一个新集合类型，Multiset，支持元素的多次添加，数学中的multiset定义为元素可以出现不止一次的set。在multiset中，类似sets和tuples，元素是无序的，如multisets {a, a, b} 和 {a, b, a} 是equal的。
 
@@ -89,13 +90,13 @@ TreeMultiset实现了SortedMultiset接口。ImmutableSortedMultiset目前正在�
 每一个有经验的java程序员很可能自己实现了`Map<K, List<V>>`或者`Map<K, Set<V>>`，或者直接使用那种笨拙的结构。Guava的Multimap框架使处理从keys到多个值得映射关系变得简单。一个Multimap是一个普遍的方式来关联keys和任意多values。
 
 从概念上有2种方式来理解Multimap：单个key到单个value的映射集合：
-
+```
     a -> 1 a -> 2 a -> 4 b -> 3 c -> 5
-
+```
 或者是唯一的单个key到values集合的映射关系：
-
+```
     a -> [1, 2, 4] b -> [3] c -> [5]
-
+```
 一般来说, Multimap接口是理解这种观念最好的视图，但是也允许你使用asMap()以另一种方式来看，asMap()返回`Map<K, Collection<V>>`。    
 最重要的是， 不会出现一个key对应一个空集合的情况：一个key要么映射到至少一个value，要么在Multimap中该key不存在。   
 如果你想区分key存在但是没对应的values和key就不存在这2种情况，更适合的数据结构很可能是Graph图（支持孤立点）。
@@ -107,11 +108,12 @@ TreeMultiset实现了SortedMultiset接口。ImmutableSortedMultiset目前正在�
 Multimap.get(key)返回和给定key相关联的values视图，即时目前什么也没有。对于ListMultiMap返回一个list，SetMultimap返回一个set。
 
 修改操作直接对底层的Multimap进行写。如：    
-
+```
     Set<Person> aliceChildren = childrenMultimap.get(alice);
     aliceChildren.clear();
     aliceChildren.add(bob);
     aliceChildren.add(carol);
+```
 对底层的MultiMap直接进行写。
 
 其他修改multimap的方式（更直接）包括：
@@ -171,21 +173,21 @@ ImmutableSetMultimap	|ImmutableMap	|ImmutableSet
 ### BiMap 双向Map
 
 传统映射values到key的方式是维护2个独立的map，保持他们同步，但是这种方式当一个value已经在map里存在时令人极度困惑且感觉像是bug。如：   
-
+```
     Map<String, Integer> nameToId = Maps.newHashMap();
     Map<Integer, String> idToName = Maps.newHashMap();
 
     nameToId.put("Bob", 42);
     idToName.put(42, "Bob");
     // 如果“Bob”或42已经存在，当我们刚好又忘记保持他们同步的时候，就会发生奇怪的错误。
-
+```
 A `BiMap<K, V>` 是一个`Map<K,V>`：
   - 允许你使用inverse()方法来得到反转视图BiMap<V,K>
   - 确保values是不重复的，使values类似一个Set
 
 所有，BiMap的特点是key、value都不能重复。
 若尝试添加一个key到已经存在的value映射会报参数异常。若想删除预先存在的entry（指定的value），则使用BiMap.forcePut(key, value)。
-
+```
     public static void main(String[] args) {
            BiMap<String, String> biMap = HashBiMap.create();
            biMap.put("1", "2");
@@ -203,7 +205,7 @@ A `BiMap<K, V>` 是一个`Map<K,V>`：
            }
            #null
            #1
-
+```
 #### 实现
 
 Key-Value Map实现类 |	Value-Key Map 实现类 |	对应BiMap
@@ -215,7 +217,7 @@ EnumMap	|HashMap	|EnumHashBiMap
 Note: BiMap的工具方法如synchronizedBiMap在Maps里实现。
 
 ### 表格Table
-
+```
     Table<DateOfBirth, LastName, PersonalRecord> records = HashBasedTable.create();
     records.put(someBirthday, "Schmo", recordA);
     records.put(someBirthday, "Doe", recordB);
@@ -223,7 +225,7 @@ Note: BiMap的工具方法如synchronizedBiMap在Maps里实现。
 
     records.row(someBirthday); // returns a Map mapping "Schmo" to recordA, "Doe" to recordB
     records.column("Doe"); // returns a Map mapping someBirthday to recordB, otherBirthday to recordC
-
+```
 通常，当你想同一时间对不止一个的key检索的时候，你会想出使用类似`Map<FirstName, Map<LastName, Person>>`，这种方式丑陋难以使用。 Guava提供一个新的集合类型，表格Table，支持“行row”类型，和“column”列类型。表格Table支持很多种视图来让你可以使用从任何角度的数据，包括：
 
   - rowMap(), 该方法将`Table<R,C,V>`视作`Table<R,Map<C,V>>`。类似rowKeySet返回一个Set<R>.
@@ -244,10 +246,10 @@ Note: BiMap的工具方法如synchronizedBiMap在Maps里实现。
 除了扩展Map接口，ClassToInstanceMap提供方法T `getInstance(Class<T>`) 和T putInstance(Class<T>, T)，省去了手动进行类型转换。
 
 ClassToInstanceMap只有一个名称为B的类型参数，代表map管理的类型的上层限制，如：
-
+```
     ClassToInstanceMap<Number> numberDefaults = MutableClassToInstanceMap.create();
     numberDefaults.putInstance(Integer.class,Integer.valueOf(0);
-
+```
 严格说，ClassToInstanceMap<B>实现了接口`Map<Class<? extends B>, B>` -- 或者是从B的子类型class到B的映射的一个map，这会令ClassToInstanceMap的反省类型有些令人困惑，但记住B始终是map中类型的上层限制（上界）--通常，B就是Object类。
 
 Guava提供MutableClassToInstanceMap、ImmutableClassToInstanceMap。
@@ -257,16 +259,16 @@ Guava提供MutableClassToInstanceMap、ImmutableClassToInstanceMap。
 ### RangeSet
 
 A RangeSet描述了一个不连续的、非空的范围集合，当往一个可变的RangeSet添加一个范围的时候，任何可连续的范围都被合并到一起，空范围被忽略，如下：
-
+```
     RangeSet<Integer> rangeSet = TreeRangeSet.create();
      rangeSet.add(Range.closed(1, 10)); // {[1, 10]}
      rangeSet.add(Range.closedOpen(11, 15)); // disconnected range: {[1, 10], [11, 15)}
      rangeSet.add(Range.closedOpen(15, 20)); // connected range; {[1, 10], [11, 20)}
      rangeSet.add(Range.openClosed(0, 0)); // empty range; {[1, 10], [11, 20)}
      rangeSet.remove(Range.open(5, 10)); // splits [1, 10]; {[1, 5], [10, 10], [11, 20)}
-
+```
 记住想要合并范围如Range.closed(1, 10) and Range.closedOpen(11, 15), 必须首先使用Range.canonical(DiscreteDomain)预处理范围，如使用DiscreteDomain.integers().
-
+```
     RangeSet<Integer> rangeSet = TreeRangeSet.create();
         rangeSet.add(Range.closed(1, 10).canonical(DiscreteDomain.integers())); // {[1, 10]}
         rangeSet.add(Range.closedOpen(11, 15)); // disconnected range: {[1, 10], [11, 15)}
@@ -275,7 +277,7 @@ A RangeSet描述了一个不连续的、非空的范围集合，当往一个可�
         // canonical可以理解为规范化，效果如下：
         System.out.println(Range.closed(1, 10).canonical(DiscreteDomain.integers()));[1‥11)
         System.out.println(Range.closed(1, 10));[1‥10]
-
+```
 注意: RangeSet 在GWT下和JDK1.5之下都不被支持；RangeSet需要全部NavigableMap的特征在JDK1.6中。
 
 #### 视图
@@ -298,14 +300,14 @@ RangeSet实现支持很多视图：
 ### RangeMap
 
 RangeMap是描述不相交、非空范围到values的映射关系。不同于RangeSet，RangeMap不合并相邻映射，即使相邻的Ranges映射到相同的values。如：
-
+```
     RangeMap<Integer, String> rangeMap = TreeRangeMap.create();
     rangeMap.put(Range.closed(1, 10), "foo"); // {[1, 10] => "foo"}
     rangeMap.put(Range.open(3, 6), "bar"); // {[1, 3] => "foo", (3, 6) => "bar", [6, 10] => "foo"}
     rangeMap.put(Range.open(10, 20), "foo"); // {[1, 3] => "foo", (3, 6) => "bar", [6, 10] => "foo", (10, 20) => "foo"}
     rangeMap.remove(Range.closed(5, 11)); // {[1, 3] => "foo", (3, 5) => "bar", (11, 20) => "foo"}
     Views
-
+```
 RangeMap提供2中视图：
 
   - asMapOfRanges(): 将RangeMap当做一个`Map<Range<K>,V>`，当想要迭代RangeMap时可以使用

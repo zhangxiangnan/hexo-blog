@@ -11,6 +11,7 @@ categories: http
 <!-- more -->
 
 ### GET方式同步调用
+```
     package cn.xiangnan.okhttpdemo;
 
     /**
@@ -59,8 +60,9 @@ categories: http
             new SynchronousGet().run();
         }
     }
-
+```
 ### GET方式异步调用
+```
     package cn.xiangnan.okhttpdemo;
 
     /**
@@ -118,7 +120,7 @@ categories: http
             new AsynchronousGet().run();
         }
     }
-
+```
 ### 访问头部信息
 通常HTTP头部类似Map<String,String>工作：每一个字段有一个值或更多。但是一些头部允许多个值，如Guava的MultiMap。例如，HTTP响应体提供多个变化的headers是合法和常见的。OKHttp的API尝试优雅的处理2中情形。
 
@@ -128,7 +130,7 @@ categories: http
 
 想要访问所有的头部，使用Headers类，支持按索引访问。
 
-
+```
     package cn.xiangnan.okhttpdemo;
 
     /**
@@ -175,10 +177,10 @@ categories: http
             new AccessHeaders().run();
         }
     }
-
+```
 ### POST提交String字符串
 使用一个HTTP POST来发送一个请求体到一个服务，因为该API的整个请求体全部在内存里，所以最好<=1m。
-
+```
     package cn.xiangnan.okhttpdemo;
 
     /**
@@ -228,8 +230,9 @@ categories: http
             new PostString().run();
         }
     }
-
+```
 ### POST提交流
+```
     package cn.xiangnan.okhttpdemo;
 
     /**
@@ -299,3 +302,4 @@ categories: http
             new PostStreaming().run();
         }
     }
+```

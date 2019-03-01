@@ -20,30 +20,32 @@ categories: java
 一个字段要么是基本类型，要么是引用类型。有8中基本类型：boolean, byte, short, int, long, char, float, and double. 引用类型是直接或间接继承java.lang.Object类的子类，包括接口、数组及枚举类型。
 
 如下是一个输出不同类型字段的类型及泛华类型的展示：
+```
+    import java.lang.reflect.Field;
+    import java.util.List;
 
-      import java.lang.reflect.Field;
-      import java.util.List;
+    public class FieldSpy<T> {
+        public boolean[][] b = {{ false, false }, { true, true } };
+        public String name  = "Alice";
+        public List<Integer> list;
+        public T val;
 
-      public class FieldSpy<T> {
-          public boolean[][] b = {{ false, false }, { true, true } };
-          public String name  = "Alice";
-          public List<Integer> list;
-          public T val;
+        public static void main(String... args) {
+        try {
+            Class<?> c = Class.forName(args[0]);
+            Field f = c.getField(args[1]);
+            System.out.format("Type: %s%n", f.getType());
+            System.out.format("GenericType: %s%n", f.getGenericType());
+        } catch (ClassNotFoundException x) {
+            x.printStackTrace();
+        } catch (NoSuchFieldException x) {
+            x.printStackTrace();
+        }
+        }
+    }
+```
 
-          public static void main(String... args) {
-          	try {
-          	    Class<?> c = Class.forName(args[0]);
-          	    Field f = c.getField(args[1]);
-          	    System.out.format("Type: %s%n", f.getType());
-          	    System.out.format("GenericType: %s%n", f.getGenericType());
-          	} catch (ClassNotFoundException x) {
-          	    x.printStackTrace();
-          	} catch (NoSuchFieldException x) {
-          	    x.printStackTrace();
-          	}
-          }
-      }
-
+```
     $ java FieldSpy FieldSpy b
     Type: class [[Z
     GenericType: class [[Z
@@ -59,7 +61,7 @@ categories: java
     $ java FieldSpy FieldSpy val
     Type: class java.lang.Object
     GenericType: T
-
+```
 说明:字段b的类型时boolean类型的二维数组，类型名称的语法规则根据Class.getName()。
 字段val的类型时java.lang.Object，因为泛型的信息会在编译期间擦除泛型的相关信息。T被类型变量的上层限制替代，这里是java.lang.Object.
 Field.getGenericType()方法会在类文件中查找签名属性（如果存在）。如果签名属性不存在，会返回Field.getType()的值（没有因为引入泛型发生改变）。反射的其他名称为getGenericFoo的方法实现思路类似。
@@ -73,7 +75,7 @@ Field.getGenericType()方法会在类文件中查找签名属性（如果存在�
   - 注解
 Field.getModifiers()方法用来一个整数值，代表该字段声明的修饰符集（一个或多个修饰符），该整数值中位表示的修饰符在java.lang.reflect.Modifier定义。
 下例展示了如何根据给定的修饰符查找字段，以及判断字段是否是合成（编译器生成的）及是否是枚举常量
-
+```
     import java.lang.reflect.Field;
     import java.lang.reflect.Modifier;
     import static java.lang.System.out;
@@ -148,14 +150,14 @@ Field.getModifiers()方法用来一个整数值，代表该字段声明的修饰
     $ java FieldModifierSpy Spy private static final
     Fields in Class 'Spy' containing modifiers:  private static final
     $VALUES  [ synthetic=true  enum_constant=false ]// 枚举类有private static final类型的合成字段$VALUES
-
+```
 注意编译器会生成一些合成的运行时需要的字段，可使用Field.isSynthetic()来判断是否合成字段，合成的字段根据编译器不同不同。然而内部类引入this$0字段 (即嵌套类为非静态成员类）来持有最外层类的引用；枚举类引入$VALUES字段实现隐式地定义静态方法values().合成的类成员的名字未被指定，不同的编译器实现或不同版本中可能不同。Class.getDeclaredFields()方法会返回包含合成字段的数组，但是Class.getField()方法不会返回，因为合成字段通常不是public的。
 因为Field字段实现了接口java.lang.reflect.AnnotatedElement，因此运行时能够获取到保留策略为java.lang.annotation.RetentionPolicy.RUNTIME的注解信息。
 
 #### 设置&获取字段值
 给定某个类的一个实例，是能够用反射来设置类的字段的值。这通常仅在特殊情况下不能够以常规方式设置值。因为这么做破坏了类的设计意图，应该慎用。
 示例：
-
+```
       import java.lang.reflect.Field;
       import java.util.Arrays;
       import static java.lang.System.out;
@@ -209,19 +211,19 @@ Field.getModifiers()方法用来一个整数值，代表该字段声明的修饰
      AFTER:  characters   = [Queen, King]
     BEFORE:  twin         = DEE
      AFTER:  twin         = DUM
-
+```
 注意：通过反射设置字段的值有一定的性能开销，因为必须进行各种操作，比如访问权限验证。从运行时角度看，效果一样，并且操作就像在代码中直接改变值一样是原子性的。
 反射的使用会导致丢失一些运行时优化，如下代码很可能被虚拟机优化，但是使用Field.set*()就不会进行优化。
-
+```
     int x = 1;
     x = 2;
     x = 3;
-
+```
 #### 常见代码错误
 
 ##### IllegalArgumentException由于不可转换类型（due to Inconvertible Types）
 当使用反射给引用类型的整数赋值基本类型的数值时，就会报该错误。不是用反射的话，编译器会执行自动装箱操作，将基本类型装箱为引用类型，这样类型检查就没问题，但是用反射的话，类型检查只发生在运行时，没有机会去执行装箱操作。
-
+```
       import java.lang.reflect.Field;
 
       public class FieldTrouble {
@@ -254,25 +256,28 @@ Field.getModifiers()方法用来一个整数值，代表该字段声明的修饰
               at java.lang.reflect.Field.setLong(Field.java:831)
               at FieldTrouble.main(FieldTrouble.java:11)
 
-
+```
 解决办法：
-
+```
     f.set(ft, new Integer(43));
+```
 提示：当时使用反射设&获取一个字段的值的时候，编译器没机会来执行装箱操作。编译器只能转换Class.isAssignableFrom()方法的规范描述的相关转换。如下：
-
+```
       Integer.class.isAssignableFrom(int.class) == false// 反射时引用类型到基本类型不成功
       int.class.isAssignableFrom(Integer.class) == false// 反射时基本类型到引用类型不成功
-
+```
 ##### NoSuchFieldException for Non-Public Fields
-
+```
       $ java FieldSpy java.lang.String count
       java.lang.NoSuchFieldException: count
               at java.lang.Class.getField(Class.java:1519)
               at FieldSpy.main(FieldSpy.java:12)
+```
 提示：Class.getField()及Class.getFields()方法返回class对象代表的类、枚举、接口的公共成员方法。想获取类声明的所有方法（不是继承），使用Class.getDeclaredFields()方法。
 ##### IllegalAccessException when Modifying Final Fields
 如果尝试获取&设置私有或其他无法访问的字段的值，或设置final字段的值（不论修饰符是什么）可能会抛出IllegalAccessException异常。
 
+```
       import java.lang.reflect.Field;
 
       public class FieldTroubleToo {
@@ -308,14 +313,14 @@ Field.getModifiers()方法用来一个整数值，代表该字段声明的修饰
               (UnsafeQualifiedBooleanFieldAccessorImpl.java:78)
             at java.lang.reflect.Field.setBoolean(Field.java:686)
             at FieldTroubleToo.main(FieldTroubleToo.java:12)
-
+```
 提示：class初始化后，存在一个访问限制组织修改final字段值。Field声明为继承自AccessibleObject，提供了方法来抑制此检查。但这会产生副作用；如有时即使值已经被修改，但是程序的其他部分仍可能使用旧值。AccessibleObject.setAccessible()仅在安全上下文允许的情况下才能成功。
 ### 方法
 方法拥有返回值、参数、及可能抛出异常。java.lang.reflect.Method类提供了获取参数和返回值的类型信息的方法，也经常用来执行指定对象的方法。
 
 #### 获取方法类型信息
 一个字段要么是基本类型要么是引用类型，有8中基本类型：boolean、byte、short、int、long、char、float、double。一个引用类型指直接或间接继承java.lang.Object类包括接口、数组、枚举类型的任意对象。
-
+```
       import java.lang.reflect.Field;
       import java.util.List;
 
@@ -353,7 +358,7 @@ Field.getModifiers()方法用来一个整数值，代表该字段声明的修饰
     $ java FieldSpy FieldSpy val
     Type: class java.lang.Object
     GenericType: T
-
+```
 字段b是二维boolean数组，其类型名称的语法在Class.getName()描述。
 字段val的类型结果是继承自java.lang.Object，因为通过类型擦除实现泛型，在编译期间删除删除有关泛型的信息。所以T被类型变量的上界替换，该例是java.lang.Object.
 
@@ -363,7 +368,7 @@ Field.getGenericType()在类文件中查找签名属性（如果存在），如�
 可以使用java.lang.reflect.Executable.getParameters方法来获取任何方法或构造函数的形式参数(Method和Constructor类继承了Executable，因此继承了Executable.getParameters方法)然而，.class文件不保存默认不保存形参名称。这是因为许多生成和使用类的工具不希望更大的静态或动态的包含参数名称的类文件占位。尤其，这些工具不得不处理更大的.class类文件，JVM也会使用更多的内存。另外，某些参数名称，如secret、password可能暴露安全敏感的方法信息。
 
 为了在制定类文件中保存形参名称，这样就能够在反射时拿到这些形参的名称，可以使用-parameters配置javac编译器来编译源文件。
-
+```
       import java.lang.reflect.`*`;
       import java.util.function.`*`;
       import static java.lang.System.out;
@@ -551,7 +556,7 @@ Field.getGenericType()在类文件中查找签名属性（如果存在），如�
                 Is implicit?: false
             Is name present?: false
                Is synthetic?: false
-
+```
   - getModifiers :返回形参具有的各种特征表示的整数，该数值是下列值的和，如果应用于形式参数：
 
 Value (in decimal)	| Value (in hexadecimal) |	Description
@@ -566,18 +571,18 @@ Value (in decimal)	| Value (in hexadecimal) |	Description
 
 ##### 隐性和合成参数
   某些构造函数是如果没有被显示声明则会在源码中隐性声明。如ExampleMethods例子无构造函数，一个默认构造函数就会隐性声明。MethodParameterSpy例子打印的隐性声明构造函数如下：
-
+```
       Number of declared constructors: 1
       public ExampleMethods()
-
+```
 考虑如下片段：
-
+```
       public class MethodParameterExamples {
         public class InnerClass { }
       }
-
+```
 InnerClass是一个非京台嵌套类或内部类。内部类的有个构造函数也是隐性声明的。然而，该隐性构造包含一个参数，当java编译器编译内部类时，会生成一个类似下面的：
-
+```
       public class MethodParameterExamples {
         public class InnerClass {
             final MethodParameterExamples parent;
@@ -586,9 +591,9 @@ InnerClass是一个非京台嵌套类或内部类。内部类的有个构造函�
             }
         }
       }
-
+```
 InnerClass构造包含一个参数，参数类型是包含内部类InnerClass的类，即MethodParameterExamples。参照如下输出:
-
+```
       public MethodParameterExamples$InnerClass(MethodParameterExamples)
              Parameter class: class MethodParameterExamples
               Parameter name: this$0
@@ -596,17 +601,19 @@ InnerClass构造包含一个参数，参数类型是包含内部类InnerClass的
                 Is implicit?: true
             Is name present?: true
                Is synthetic?: false
+```
 因为InnerClass类的构造函数是隐性指定的，所以参数也是隐性的。
 注意：
 Java编译器为内部类的构造函数创建一个形式参数，以使编译器能够将创建表达式中的引用（表示直接包含的实例）传递给成员类的构造函数。值32784表示InnerClass构造函数的参数同时是finla（16）和隐性的（32768）。Java语言允许变量名称含有$符号，但是约定来说，在变量名称中不用$符号。Java编译器提供的构造函数如果他们不能对应到源码里明确地或隐含的构造函数，则就是是synthetic合成的，除非他们是类初始化方法。合成的构造函数根据不同的编译器实现而不同。考虑如下：
-
+```
       public class MethodParameterExamples {
         enum Colors {
             RED, WHITE;
         }
       }
+```
 Java编译器针对该类会生成几个方法，兼容.class类文件结构，并提供enum构造预期的功能。如，Java编译器会创建一个类文件如下：
-
+```
       final class Colors extends java.lang.Enum<Colors> {
         public final static Colors RED = new Colors("RED", 0);
         public final static Colors BLUE = new Colors("WHITE", 1);
@@ -625,11 +632,12 @@ Java编译器针对该类会生成几个方法，兼容.class类文件结构，�
             return (Colors)java.lang.Enum.valueOf(Colors.class, name);
         }
       }
+```
 java编译器创建了三个构造和方法，为该枚举构造： Colors(String name, int ordinal), Colors[] values(), and Colors valueOf(String name). 方法values和valueOf是隐性声明的. 因此他们的形参名称也是隐性的。
 
 枚举的Colors(String name, int ordinal)构造函数是一个默认构造函数，隐性声明。然而，该构造的形参（name和ordinal）则是非隐性声明的，因为这些形参既不是明确的，也不是隐性的，是合成的。 (一个枚举构造的默认构造的形参不是隐性声明的，因为不同的编译器构造的形式要求不一样；另一个java编译器可能指定不同的形参。当编译器编译使用了枚举常量的表达式时，他们仅仅依赖枚举构造的公共静态字段，不依赖构造函数及常量初始化的过程。）
 因此：
-
+```
         enum Colors:
 
         Number of constructors: 0
@@ -670,7 +678,7 @@ java编译器创建了三个构造和方法，为该枚举构造： Colors(Strin
                   Is implicit?: true
               Is name present?: true
                  Is synthetic?: false
-
+```
 #### 获取&解析方法修饰符
 有几个可能成为方法声明的几个修饰符：
 
@@ -684,7 +692,7 @@ java编译器创建了三个构造和方法，为该枚举构造： Colors(Strin
   - 注解：Annotations
 
 MethodModifierSpy例子展示的指定方法的修饰符，及方法是否是编译器生成（synthetic），是否包含可变参数，是否是桥接方法（编译器生成来支持通用接口).
-
+```
         import java.lang.reflect.Method;
         import java.lang.reflect.Modifier;
         import static java.lang.System.out;
@@ -762,16 +770,19 @@ MethodModifierSpy例子展示的指定方法的修饰符，及方法是否是编
         [ synthetic=true  var_args=false bridge=true  ]
 
         2 matching overloads found
-
+```
 注意对Class.getConstructor()执行Method.isVarArgs()返回true，这因为该方法声明如下：
-
+```
       public Constructor<T> getConstructor(Class<?>... parameterTypes)
+```
 而非：
-
+```
       public Constructor<T> getConstructor(Class<?> [] parameterTypes)
+```
 注意String.compareTo()方法的输出有2个方法，一个是String.java声明的：
-
+```
       public int compareTo(String anotherString);
+```      
 另一个是编译器生成的桥接方法或合成方法。这种情况是因为String事先了参数化泛型接口Comparable。在类型擦除时，继承的方法Comparable.compareTo()的参数类型从java.lang.Object变为java.lang.String。由于Comparable接口中的compareTo方法的参数化类型和String的方法在类型擦除后，不在匹配，不存在覆盖overriding。在所有的情形中，这会产生一个编译错误，因为接口没有被实现。桥接方法的作用就是避免这种问题。
 
 Method实现了java.lang.reflect.AnnotatedElement，所以保留策略为运行时的注解java.lang.annotation.RetentionPolicy.RUNTIME都能够获取到.
@@ -779,7 +790,7 @@ Method实现了java.lang.reflect.AnnotatedElement，所以保留策略为运行�
 反射提供了执行类的方法的手段。通常，反射调用方法仅仅当在非反射代码里不可能转化类的实例到指定类型时才是必须的。通过java.lang.reflect.Method.invoke()可以执行方法的调用，第一个参数表示执行哪一个实例的指定方法（如果方法是静态的，第一个参数应该是null），第二个参数表示方法执行所需的参数。如果底层方法抛出异常，会被java.lang.reflect.InvocationTargetException包装。方法的原始异常可以通过异常链机制的InvocationTargetException.getCause()方法获取。
 
 ##### 找到&执行指定声明的方法
-
+```
         import java.lang.reflect.InvocationTargetException;
         import java.lang.reflect.Method;
         import java.lang.reflect.Type;
@@ -844,6 +855,8 @@ Method实现了java.lang.reflect.AnnotatedElement，所以保留策略为运行�
         	}
           }
         }
+```
+
 Deet invokes getDeclaredMethods() which will return all methods explicitly declared in the class. Also, Class.isAssignableFrom() is used to determine whether the parameters of the located method are compatible with the desired invocation. Technically the code could have tested whether the following statement is true since Locale is final:
 
 Locale.class == pType[0].getClass()

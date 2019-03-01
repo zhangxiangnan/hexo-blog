@@ -18,6 +18,7 @@ thrift的类型系统目的在于允许开发人员尽可能使用本地类型�
 
 ##### 基本类型
 简单类型以简单明了作为目标，而不是提供大量简单类型，集中在所有语言共有的关键类型上。
+```
 - bool：一个布尔值，true或者false，对应java的boolean
 - byte：一个8字节的有符号整数，对应java的byte
 - i16：16位的有符号整数，对应java的short
@@ -25,7 +26,7 @@ thrift的类型系统目的在于允许开发人员尽可能使用本地类型�
 - i64: 一个64位的有符号整数，对应java的long
 - double：一个64位浮点数，对应java的double
 - string：一个使用utf8编码的字符串，对应java的string   
-
+```
 注意：没有无符号整数，因为大多数语言没有这种类型。
 
 ##### 特殊类型
@@ -38,10 +39,11 @@ thrift的类型系统目的在于允许开发人员尽可能使用本地类型�
 ##### 容器类型Containers
 thrift的容器类型是强类型容器，对应大部分语言中常用和公共的容器类型。
 有3种容器类型：
+```
 - list：有序的元素列表，被转换为STL vector，java arraylist，脚本语言中的数组等。
 - set：唯一元素的无序集合，被转换为STL set，java hashset，Python set等，php无sets，转成类似于list对待。
 - map：严格的唯一键到值得映射，转换为STL map，java hashmap，PHP associative array，Python/ruby的dictionary等。默认时，类型映射未明确绑定，自定义代码生成器可以替换为目标语言的自定义类型（不懂。）
-
+```
 容器类型支持任何有效的thrift type。
 N.B.: 为了最大的兼容通用性，map的key只能使用基本类型，不能使用容器或者结构体类型，因为有些语言的原始map类型不支持key使用复杂类型，如json协议的key只支持使用基本类型。
 

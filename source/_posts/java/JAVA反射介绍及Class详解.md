@@ -36,53 +36,63 @@ categories: java
   所有反射操作的入口是java.lang.Class。除了java.lang.reflect.ReflectPermission类，java.lang.reflect包下的其他类都没有公共构造函数。要获得这些类，有必要调取Class的相应地方法。有几种方法来来获取Class，根据是代码否有权限访问一个对象，类的名称，类型或一个已存在的Class。
 ##### Object.getClass()
   如果能取到类的某个实例对象，最简单的获取其Class对象的方式是调用Object.getClass()方法。当然，这种方式只适合于全部继承自Object类的引用类型。如：
-
+```
     Class c = "foo".getClass();
+```
+
   返回String类的Class对象
-
+```
     Class c = System.console().getClass();
-  和虚拟机关联的有一个唯一的console对象，通过System.console()对象返回，getClass()返回的是java.io.Console类的Class对象。
+```
 
+  和虚拟机关联的有一个唯一的console对象，通过System.console()对象返回，getClass()返回的是java.io.Console类的Class对象。
+```
     enum E { A, B }
     Class c = A.getClass();
+```
   A是枚举类型E的一个实例，getClass()方法返回枚举类型E对应的Class对象
 
+```
     byte[] bytes = new byte[1024];
     Class c = bytes.getClass();
+```
   由于数组是Object对象，所以也能对数组的实例调用getClass()方法。返回的Class对应组件类型为byte的数组
 
+```
     import java.util.HashSet;
     import java.util.Set;
 
     Set<String> s = new HashSet<String>();
     Class c = s.getClass();
-
+```
   该例中，java.util.Set是java.util.HashSet类型的实例对象实现的一个接口。getClass()返回的Class对应于java.util.HashSet。
 
 ##### .class语法
 如果有类型但是没有实例对象，通过追加".class"到类型的名称后面也可以获取到Class。这也是基本类型最简单的方式获取Class。
-
+```
       boolean b;
       Class c = b.getClass();   // 编译报错
 
       Class c = boolean.class;  // 正确
-    注意boolean.getClass()会产生编译错误，因为boolean类型时基本类型，不能被引用。.class语法返回类型boolean对应的Class。
-
+```
+注意boolean.getClass()会产生编译错误，因为boolean类型时基本类型，不能被引用。.class语法返回类型boolean对应的Class。
+```
       Class c = java.io.PrintStream.class;
     返回java.io.PrintStream类型对应的Class对象
 
       Class c = int[][][].class;
     The .class也用来获取多维数组类型对应的Class
-
+```
 ##### Class.forName()
 如果有一个类的全限定名称，使用静态方法Class.forName()能获取到对应的Class对象。该方式不能用来加载基本类型。
-
+```
     Class c = Class.forName("com.duke.MyLocaleServiceProvider");
+```
 该语句根据传入的全限定名来创建一个class对象
-
+```
     Class cDoubleArray = Class.forName("[D");
     Class cStringArray = Class.forName("[[Ljava.lang.String;");
-
+```
 如果是数组类型传入的名称，则按下面Class.getName的描述；变量cDoubleArray表示基本类型double数组对应的Class（和double[].class一样），变量cStringArray表示String的二维数组对应的Class（和String[][].class一样）。
 
 ##### Class.getName()：
@@ -126,34 +136,35 @@ Class c = Void.TYPE;//相等于void.class.
 
 **Class.getSuperclass()**
   返回指定class的超类class
-
+```
     Class c = javax.swing.JButton.class.getSuperclass();// 返回javax.swing.AbstractButton.    
-
+```
 **Class.getClasses()**    
 返回指定class的所有的公共classes、接口及枚举成员，包含继承的成员。
-
+```
     Class<?>[] c = Character.class.getClasses();//返回内部多个公共class成员   
-
+```
 **Class.getDeclaredClasses()**    
 返回class里所有显示声明的类、接口、枚举（公共、私有等都包含）
-
+```
     Class<?>[] c = Character.class.getDeclaredClasses();//返回显示声明的几个类
-
+```
 **Class.getDeclaringClass()**   
 如果Class对象表示的接口或类是另一个类的成员，则返回声明该成员的类对应的Class对象；否则如果不是任何其他类的成员则返回null。如果该Class对象表示一个数组类型、基本类型、或void，则返回null。
 匿名类的声明没有声明类但有一个封闭类    
-
+```
     public class MyClass {
         static Object o = new Object() {
             public void m() {}
         };
         static Class<c> = o.getClass().getDeclaringClass();
     }
+```
 o定义的匿名类的声明类为null
 
 **Class.getEnclosingClass()**
 返回class的直接封闭类   
-
+```
     Class c = Thread.State.class().getEnclosingClass();//枚举类Thread.State的封闭类是Thread
 
     public class MyClass {
@@ -163,14 +174,14 @@ o定义的匿名类的声明类为null
         static Class<c> = o.getClass().getEnclosingClass();
     }
     o定义的匿名内部类的封闭类是Mycalss
-
+```
 **java.lang.reflect.Field.getDeclaringClass()**   
 返回这些成员被声明的Class。    
-
+```
     import java.lang.reflect.Field;
     Field f = System.class.getField("out");
     Class c = f.getDeclaringClass();//返回System,out字段在System类里定义
-
+```
 **java.lang.reflect.Method.getDeclaringClass()**    
 返回这些成员被声明的Class。
 
@@ -213,6 +224,7 @@ class可以定义一个或多个修饰符来决定运行时行为：
 并不是所有的修饰符可以用在所有类上，如接口不能用final修饰，enum不能用abstract修饰。java.lang.reflect.Modifier包含了所有可能的修饰符的声明，也包含了对Class.getModifiers()方法返回的修饰符标记的解码方法。
 
 如下例展示了如何获取类的声明的组件类型包括修饰符、泛型参数、实现的接口及继承的父类的路径。如果累实现了java.lang.reflect.AnnotatedElement接口，也能拿到运行时的注解信息
+``` 
     import java.lang.annotation.Annotation;
     import java.lang.reflect.Modifier;
     import java.lang.reflect.Type;
@@ -286,9 +298,9 @@ class可以定义一个或多个修饰符来决定运行时行为：
          	}
         }
     }
-
+```
 几个不同输入参数下的结果示例如下:
-
+```
     $ java ClassDeclarationSpy java.util.concurrent.ConcurrentNavigableMap
     Class:
       java.util.concurrent.ConcurrentNavigableMap
@@ -376,8 +388,9 @@ class可以定义一个或多个修饰符来决定运行时行为：
 
     Annotations:
       @java.lang.Deprecated()
-    java.security.Identity被注解标记为过时的api，可以用来通过反射代码来监测过时API
-    注意：并不是所有的注解都能通过反射拿到，需要注解的保留策略的类型为Runtime类型（ java.lang.annotation.RetentionPolicy of RUNTIME）的注解才能在运行时拿到。
+  ```
+  java.security.Identity被注解标记为过时的api，可以用来通过反射代码来监测过时API
+  注意：并不是所有的注解都能通过反射拿到，需要注解的保留策略的类型为Runtime类型（ java.lang.annotation.RetentionPolicy of RUNTIME）的注解才能在运行时拿到。
 
 #### 获取Class的成员
 Class里提供了2类方法来访问字段、方法、构造函数：枚举所有成员的方法及查找某个指定成员的方法。还有不同的方法来访问类本身直接声明的成员及查找实现的接口或实现类继承下来的成员。
@@ -409,7 +422,7 @@ getConstructor()	|no	|N/A1	|no
 getDeclaredConstructors()	|yes	|N/A1	|yes
 getConstructors()	|yes	|N/A1	|no
 构造函数不能被继承
-
+```
     import java.lang.reflect.Constructor;
     import java.lang.reflect.Field;
     import java.lang.reflect.Method;
@@ -482,9 +495,9 @@ getConstructors()	|yes	|N/A1	|no
         	out.format("%n");
         }
     }
-
+```
 以下是几个示例：
-
+```
     $ java ClassSpy java.lang.ClassCastException CONSTRUCTOR
     Class:
       java.lang.ClassCastException
@@ -555,12 +568,12 @@ getConstructors()	|yes	|N/A1	|no
         out.format("  %s%n", f.toGenericString());
         out.format("  -- declared in: %s%n", f.getDeclaringClass());
     }
-
+```
 #### 常见问题
 ##### 编译警告
 可能发生的警告为："Note: ... uses unchecked or unsafe operations"
 当调用一个方法时，参数值的类型经过校验，很可能经过转化。如下例getMethod()方法引起常见的未收校验的转换警告：
-
+````
     import java.lang.reflect.Method;
 
     public class ClassWarning {
@@ -585,21 +598,23 @@ getConstructors()	|yes	|N/A1	|no
       (String,Class<?>...) as a member of the raw type Class
     Method m = c.getMethod("m");  // warning
                           ^
+```
 因为c被声明为原始类型（不带有类型参数），但是getMethod()方法是一个参数化类型，所以发生未经转换的警告
 有2中解决方法，更倾向于修改c的声明，使其带有合适的泛型类型，该例的声明应该为：
-
+```
     Class<?> c = warn.getClass();
+```
 或者可以使用@SuppressWarnings来抑制警告
-
+```
     Class c = ClassWarning.class;
     @SuppressWarnings("unchecked")
     Method m = c.getMethod("m");  
-
+```
 建议：通常的原则是,警告不应该被忽略， 因为警告可能表明一个bug。参数化声明应该合理使用。如果参数化声明不可能（如和厂商的类库代码交互），则可以使用@SuppressWarnings.
 
 ##### 构造函数不可访问时构造异常
 如果在类的无参构造函数不可访问时，调用Class.newInstance()方法会抛出InstantiationException异常。
-
+```
       class Cls {
           private Cls() {}
       }
@@ -626,5 +641,6 @@ getConstructors()	|yes	|N/A1	|no
               at java.lang.Class.newInstance0(Class.java:349)
               at java.lang.Class.newInstance(Class.java:308)
               at ClassTrouble.main(ClassTrouble.java:9)
+```
 Class.newInstance()的行为和new关键字很类似，会因为new关键失败的相同原因失败。反射里通用的解决方案是利用java.lang.reflect.AccessibleObject类提供的抑制访问控制校验的功能；然而由于java.lang.Class没继承AccessibleObject，所以不会有效。唯一的方案是使使用Constructor.newInstance()方法的类继承AccessibleObject。
 建议：通常，更倾向于使用Constructor.newInstance()

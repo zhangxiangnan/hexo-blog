@@ -13,6 +13,7 @@ guava的不可变集合讲解-Immutable*
 <!-- more -->
 
 ### jdk的Collections.ImmutableXXX例子
+```
     package cn.zxn.guava.collections;
 
     import java.util.ArrayList;
@@ -35,11 +36,11 @@ guava的不可变集合讲解-Immutable*
         System.out.println(unmodifiableList.size());// 输出3
     }
     }
-
+```
 
 ### guava例子:   
-
-    // 不可变set声明示例
+```
+  // 不可变set声明示例
     public static final ImmutableSet<String> COLOR_NAMES = ImmutableSet.of(
       "red",
       "orange",
@@ -55,7 +56,7 @@ guava的不可变集合讲解-Immutable*
           // 保护性拷贝，使集合immutableBars不可被删除增加元素，但是可以调用元素自身的方法进行元素的修改
         }
       }
-
+```
 ### 使用不可变对象的原因
 不可变对象有许多好处，包括：
   - 安全地被不受信任的类库使用
@@ -79,18 +80,19 @@ JDK提供Collections.unmodifiableXXX类似的方法，但在我们看来:
   - 使用copyOf方法，例如，ImmutableSet.copyOf(set)；
   - 使用Of方法，如，ImmutableSet.of("a", "b", "c")或者ImmutableMap.of("a", "1", "b", 2);
   - 使用一个创建器Builder，如，   
-
+```
         public static final ImmutableSet<Color> GOOGLE_COLORS =
            ImmutableSet.<Color>builder()
                .addAll(WEBSAFE_COLORS)
                .add(new Color(0, 191, 255))
                .build();
+```
 除了排序集合，元素顺序在构建时被保持。
 如，ImmutableSet.of("a", "b", "c", "a", "d", "b") 迭代输出会得到结果： "a", "b", "c", "d".
 
 #### 智能拷贝
   有必要记住ImmutableXXX.copyOf尝试避免拷贝数据（如果这么做安全地话）-- 确切的细节未指定，但是实现通常是智能的，如，
-
+```
     ImmutableSet<String> foobar = ImmutableSet.of("foo", "bar", "baz");
     thingamajig(foobar);
 
@@ -98,6 +100,7 @@ JDK提供Collections.unmodifiableXXX类似的方法，但在我们看来:
       ImmutableList<String> defensiveCopy = ImmutableList.copyOf(collection);
       ...
     }
+```
 以上代码中，ImmutableList.copyOf(foobar) 将足够智能仅仅返回foobar.asList()，这是ImmutableSet的一个O(1)时间复杂度的方法。
 
 ImmutableXXX.copyOf(ImmutableCollection)通常会在符合以下条件下来尝试来避免线性时间的拷贝：
